@@ -1,20 +1,36 @@
-// server.js
-import { createServer } from "http";
-const server = createServer((req, res) => {
-  const { method, url } = req;
-  res.setHeader("Content-Type", "application/json");
-  if (method === "GET" && url === "/") {
-    res.writeHead(200);
-    res.end(
-      JSON.stringify({
-        message: "สวัสดีจาก POST Server!",
-      }),
-    );
-  } else if (method === "POST" && url === "/about") {
-    res.writeHead(404);
-    res.end(JSON.stringify({ error: "ไมพบหนาที่ตองการ" }));
-  }
+import "dotenv/config";
+import net from "net";
+import express from "express";
+
+const app = express();
+const DEFAULT_PORT = Number(process.env.PORT) || 3000;
+
+function findFreePort(port) {
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.unref();
+    server.on("error", (err) => {
+      if (err.code === "EADDRINUSE") {
+        server.close(() => resolve(findFreePort(port + 1)));
+      } else {
+        reject(err);
+      }
+    });
+    server.listen(port, () => {
+      const availablePort = server.address().port;
+      server.close(() => resolve(availablePort));
+    });
+  });
+}
+
+const PORT = await findFreePort(DEFAULT_PORT);
+
+app.use(express.json()); // Middleware: แปลง JSON
+
+app.get("/", (req, res) => {
+  res.json({ message: "สวัสดีจาก Express.js!" });
 });
-server.listen(3000, () => {
-  console.log("Server รันอยูที่ http://localhost:3000");
+
+app.listen(PORT, () => {
+  console.log(`Server รันอยู่ที่ http://localhost:${PORT}`);
 });

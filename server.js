@@ -7,10 +7,10 @@ const server = createServer((req, res) => {
     res.writeHead(200);
     res.end(
       JSON.stringify({
-        message: "สวัสดีจาก Node.js Server!",
+        message: "สวัสดีจาก POST Server!",
       }),
     );
-  } else {
+  } else if (method === "POST" && url === "/about") {
     res.writeHead(404);
     res.end(JSON.stringify({ error: "ไมพบหนาที่ตองการ" }));
   }
